@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: stg_olist__product_category_translation
+    description: "Lookup table mapping Portuguese product category names to English."
+    columns:
+      - name: category_portuguese
+        description: "Primary key. Product category name in Portuguese."
+        tests:
+          - not_null
+          - unique
+
+      - name: category_english
+        description: "Product category name in English."
+        tests:
+          - not_null

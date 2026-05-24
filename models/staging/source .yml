@@ -1,0 +1,213 @@
+version: 2
+
+sources:
+  - name: raw
+    database: OLIST
+    schema: RAW
+    description: "Raw data loaded from the Olist e-commerce platform."
+
+    tables:
+      - name: RAW_CUSTOMERS
+        description: "Raw customer data from Olist. One row per customer order entry."
+        columns:
+          - name: CUSTOMER_ID
+            description: "Primary key. Unique identifier per order entry."
+            tests:
+              - not_null
+              - unique
+          - name: CUSTOMER_UNIQUE_ID
+            description: "True unique customer identifier across multiple orders."
+            tests:
+              - not_null
+          - name: CUSTOMER_ZIP_CODE_PREFIX
+            description: "Customer zip code prefix."
+            tests:
+              - not_null
+          - name: CUSTOMER_CITY
+            description: "Customer city name."
+          - name: CUSTOMER_STATE
+            description: "Customer state code."
+
+      - name: RAW_GEOLOCATION
+        description: "Raw geolocation data mapping zip codes to coordinates."
+        columns:
+          - name: GEOLOCATION_ZIP_CODE_PREFIX
+            description: "Zip code prefix. Not unique — multiple lat/lng per zip."
+            tests:
+              - not_null
+          - name: GEOLOCATION_LAT
+            description: "Latitude coordinate."
+            tests:
+              - not_null
+          - name: GEOLOCATION_LNG
+            description: "Longitude coordinate."
+            tests:
+              - not_null
+          - name: GEOLOCATION_CITY
+            description: "City name."
+          - name: GEOLOCATION_STATE
+            description: "State code."
+
+      - name: RAW_ORDERS
+        description: "Raw order data from Olist. One row per order."
+        columns:
+          - name: ORDER_ID
+            description: "Primary key. Unique identifier for each order."
+            tests:
+              - not_null
+              - unique
+          - name: CUSTOMER_ID
+            description: "Foreign key to RAW_CUSTOMERS."
+            tests:
+              - not_null
+          - name: ORDER_STATUS
+            description: "Current status of the order."
+            tests:
+              - not_null
+          - name: ORDER_PURCHASE_TIMESTAMP
+            description: "Timestamp when the order was placed."
+            tests:
+              - not_null
+          - name: ORDER_APPROVED_AT
+            description: "Timestamp when payment was approved."
+          - name: ORDER_DELIVERED_CARRIER_DATE
+            description: "Timestamp when order was handed to carrier."
+          - name: ORDER_DELIVERED_CUSTOMER_DATE
+            description: "Timestamp when order was delivered to customer."
+          - name: ORDER_ESTIMATED_DELIVERY_DATE
+            description: "Estimated delivery timestamp."
+
+      - name: RAW_ORDER_ITEMS
+        description: "Raw order items. One row per item per order."
+        columns:
+          - name: ORDER_ID
+            description: "Foreign key to RAW_ORDERS."
+            tests:
+              - not_null
+          - name: ORDER_ITEM_ID
+            description: "Sequential item number within an order."
+            tests:
+              - not_null
+          - name: PRODUCT_ID
+            description: "Foreign key to RAW_PRODUCTS."
+            tests:
+              - not_null
+          - name: SELLER_ID
+            description: "Foreign key to RAW_SELLERS."
+            tests:
+              - not_null
+          - name: SHIPPING_LIMIT_DATE
+            description: "Shipping deadline timestamp."
+          - name: PRICE
+            description: "Item price in Brazilian Real."
+            tests:
+              - not_null
+          - name: FREIGHT_VALUE
+            description: "Freight value in Brazilian Real."
+            tests:
+              - not_null
+
+      - name: RAW_ORDER_PAYMENTS
+        description: "Raw payment data. One row per payment per order."
+        columns:
+          - name: ORDER_ID
+            description: "Foreign key to RAW_ORDERS."
+            tests:
+              - not_null
+          - name: PAYMENT_SEQUENTIAL
+            description: "Sequential payment number for orders with multiple payments."
+            tests:
+              - not_null
+          - name: PAYMENT_TYPE
+            description: "Payment method used."
+            tests:
+              - not_null
+          - name: PAYMENT_INSTALLMENTS
+            description: "Number of installments chosen by customer."
+            tests:
+              - not_null
+          - name: PAYMENT_VALUE
+            description: "Payment amount in Brazilian Real."
+            tests:
+              - not_null
+
+      - name: RAW_ORDER_REVIEWS
+        description: "Raw review data from Olist. Known issue: contains duplicate REVIEW_IDs per order. Deduplication handled in staging."
+        columns:
+          - name: REVIEW_ID
+            description: "Review identifier. Not unique in source — known data quality issue."
+            tests:
+              - not_null
+          - name: ORDER_ID
+            description: "Foreign key to RAW_ORDERS."
+            tests:
+              - not_null
+          - name: REVIEW_SCORE
+            description: "Review score from 1 to 5."
+            tests:
+              - not_null
+          - name: REVIEW_COMMENT_TITLE
+            description: "Short title of the review."
+          - name: REVIEW_COMMENT_MESSAGE
+            description: "Full text of the review."
+          - name: REVIEW_CREATION_DATE
+            description: "Timestamp when the review was created."
+            tests:
+              - not_null
+          - name: REVIEW_ANSWER_TIMESTAMP
+            description: "Timestamp when Olist responded to the review."
+
+      - name: RAW_PRODUCTS
+        description: "Raw product data from Olist. One row per product."
+        columns:
+          - name: PRODUCT_ID
+            description: "Primary key. Unique identifier for each product."
+            tests:
+              - not_null
+              - unique
+          - name: PRODUCT_CATEGORY_NAME
+            description: "Product category name in Portuguese."
+          - name: PRODUCT_NAME_LENGHT
+            description: "Character length of product name. Note: typo in source column name (LENGHT)."
+          - name: PRODUCT_DESCRIPTION_LENGHT
+            description: "Character length of product description. Note: typo in source column name (LENGHT)."
+          - name: PRODUCT_PHOTOS_QTY
+            description: "Number of product photos."
+          - name: PRODUCT_WEIGHT_G
+            description: "Product weight in grams."
+          - name: PRODUCT_LENGTH_CM
+            description: "Product length in centimeters."
+          - name: PRODUCT_HEIGHT_CM
+            description: "Product height in centimeters."
+          - name: PRODUCT_WIDTH_CM
+            description: "Product width in centimeters."
+
+      - name: RAW_PRODUCT_CATEGORY_TRANSLATION
+        description: "Lookup table mapping Portuguese product category names to English."
+        columns:
+          - name: PRODUCT_CATEGORY_NAME
+            description: "Primary key. Product category name in Portuguese."
+            tests:
+              - not_null
+              - unique
+          - name: PRODUCT_CATEGORY_NAME_ENGLISH
+            description: "Product category name translated to English."
+            tests:
+              - not_null
+
+      - name: RAW_SELLERS
+        description: "Raw seller data from Olist. One row per seller."
+        columns:
+          - name: SELLER_ID
+            description: "Primary key. Unique identifier for each seller."
+            tests:
+              - not_null
+              - unique
+          - name: SELLER_ZIP_CODE_PREFIX
+            description: "Seller zip code prefix."
+            tests:
+              - not_null
+          - name: SELLER_CITY
+            description: "Seller city name."
+          - name: SELLER_STATE
+            description: "Seller state code."

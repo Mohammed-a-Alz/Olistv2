@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: stg_olist__products
+    description: "Cleaned product data from Olist. One row per product."
+    columns:
+      - name: product_id
+        description: "Primary key. Unique identifier for each product."
+        tests:
+          - not_null
+          - unique
+
+      - name: category
+        description: "Product category name in Portuguese."
+
+      - name: name_length
+        description: "Character length of the product name."
+
+      - name: description_length
+        description: "Character length of the product description."
+
+      - name: photos_count
+        description: "Number of product photos."
+
+      - name: weight_g
+        description: "Product weight in grams."
+
+      - name: length_cm
+        description: "Product length in centimeters."
+
+      - name: height_cm
+        description: "Product height in centimeters."
+
+      - name: width_cm
+        description: "Product width in centimeters."
+
+      - name: volume_cm3
+        description: "Product volume in cubic centimeters. Computed as length x height x width."
