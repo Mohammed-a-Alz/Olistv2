@@ -1,0 +1,72 @@
+version: 2
+
+sources:
+  - name: raw
+    database: OLIST
+    schema: RAW
+    tables:
+      - name: RAW_CUSTOMERS
+        columns:
+          - name: CUSTOMER_ID
+            tests:
+              - not_null
+              - unique
+
+      - name: RAW_GEOLOCATION
+        columns:
+          - name: GEOLOCATION_ZIP_CODE_PREFIX
+            tests:
+              - not_null
+
+      - name: RAW_ORDERS
+        columns:
+          - name: ORDER_ID
+            tests:
+              - not_null
+              - unique
+          - name: CUSTOMER_ID
+            tests:
+              - not_null
+
+      - name: RAW_ORDER_ITEMS
+        columns:
+          - name: ORDER_ID
+            tests:
+              - not_null
+          - name: ORDER_ITEM_ID
+            tests:
+              - not_null
+
+      - name: RAW_ORDER_PAYMENTS
+        columns:
+          - name: ORDER_ID
+            tests:
+              - not_null
+
+      - name: RAW_ORDER_REVIEWS
+        columns:
+          - name: REVIEW_ID
+            tests:
+              - not_null
+              
+
+      - name: RAW_PRODUCTS
+        columns:
+          - name: PRODUCT_ID
+            tests:
+              - not_null
+              - unique
+
+      - name: RAW_PRODUCT_CATEGORY_TRANSLATION
+        columns:
+          - name: PRODUCT_CATEGORY_NAME
+            tests:
+              - not_null
+              - unique
+
+      - name: RAW_SELLERS
+        columns:
+          - name: SELLER_ID
+            tests:
+              - not_null
+              - unique
