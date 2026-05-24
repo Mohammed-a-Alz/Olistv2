@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: stg_olist__order_reviews
+    description: "Cleaned and deduplicated reviews from Olist. One row per order, keeping the latest review."
+    columns:
+      - name: review_id
+        description: "Primary key. Unique identifier for each review."
+        tests:
+          - not_null
+         
+
+      - name: order_id
+        description: "Foreign key to stg_olist__orders. Unique after deduplication."
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('stg_olist__orders')
+                field: order_id
+
+      - name: review_score
+        description: "Review score from 1 to 5."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+
+      - name: review_title
+        description: "Short title of the review comment."
+
+      - name: review_body
+        description: "Full text of the review comment."
+
+      - name: created_at
+        description: "Timestamp when the review was created."
+        tests:
+          - not_null
+
+      - name: answered_at
+        description: "Timestamp when Olist responded to the review."
+
+      - name: sentiment
+        description: "Sentiment bucket derived from review score. positive (4-5), neutral (3), negative (1-2)."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['positive', 'neutral', 'negative']
+
+      - name: has_comment
+        description: "True if the review includes a written comment."
+        tests:
+          - not_null

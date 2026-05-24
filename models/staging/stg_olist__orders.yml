@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_olist__orders
+    description: "Cleaned and enriched orders from Olist. One row per order."
+    columns:
+      - name: order_id
+        description: "Primary key. Unique identifier for each order."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Foreign key to stg_olist__customers."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_olist__customers')
+                field: customer_id
+
+      - name: order_status
+        description: "Current status of the order."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['delivered', 'shipped', 'canceled', 'unavailable',
+                         'invoiced', 'processing', 'created', 'approved']
+
+      - name: purchased_at
+        description: "Timestamp when the order was purchased."
+        tests:
+          - not_null
+
+      - name: approved_at
+        description: "Timestamp when the order was approved."
+
+      - name: delivered_to_carrier_at
+        description: "Timestamp when the order was delivered to the carrier."
+
+      - name: delivered_to_customer_at
+        description: "Timestamp when the order was delivered to the customer."
+
+      - name: estimated_delivery_at
+        description: "Estimated delivery timestamp."
+
+      - name: is_delivered
+        description: "True if the order status is delivered."
+        tests:
+          - not_null
+
+      - name: is_canceled
+        description: "True if the order status is canceled or unavailable."
+        tests:
+          - not_null
+
+      - name: delivery_days
+        description: "Number of days between purchase and delivery to customer."

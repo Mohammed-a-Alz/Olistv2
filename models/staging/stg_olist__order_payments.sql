@@ -25,6 +25,7 @@ renamed as (
         end                         as is_installment
 
     from source
+        where payment_type != 'not_defined'   -- filter out 0 rows of unknown payment type
 )
 
 select * from renamed
