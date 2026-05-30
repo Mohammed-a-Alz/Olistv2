@@ -2,33 +2,12 @@ with customers as (
     select * from {{ ref('stg_olist__customers') }}
 ),
 
-orders as (
-    select * from {{ ref('stg_olist__orders') }}
-),
-
-geolocation_raw as (
-    select * from {{ ref('stg_olist__geolocation') }}
-),
-
--- deduplicate: multiple coordinates per zip, take average centroid
 geolocation as (
-    select
-        zip_code,
-        avg(latitude)   as latitude,
-        avg(longitude)  as longitude
-    from geolocation_raw
-    group by zip_code
+    select * from {{ ref('int_geolocation_deduped_to_zip') }}
 ),
 
 customer_orders as (
-    select
-        customer_id,
-        min(purchased_at)               as first_order_at,
-        max(purchased_at)               as last_order_at,
-        count(distinct order_id)        as total_orders,
-        max(case when is_delivered then 1 else 0 end) as has_delivered_order
-    from orders
-    group by customer_id
+    select * from {{ ref('int_orders_aggregated_to_customers') }}
 ),
 
 final as (
@@ -37,7 +16,7 @@ final as (
         c.customer_id,
         c.customer_unique_id,
 
-        -- location attributes
+        -- attributes
         c.zip_code,
         c.city,
         c.state,
@@ -46,7 +25,7 @@ final as (
         g.latitude,
         g.longitude,
 
-        -- lifecycle attributes
+        -- lifecycle
         co.first_order_at,
         co.last_order_at,
 

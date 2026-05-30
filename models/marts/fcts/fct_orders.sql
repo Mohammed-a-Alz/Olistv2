@@ -2,22 +2,12 @@ with orders as (
     select * from {{ ref('stg_olist__orders') }}
 ),
 
-payments_raw as (
-    select * from {{ ref('stg_olist__order_payments') }}
+payments as (
+    select * from {{ ref('int_payments_aggregated_to_orders') }}
 ),
 
 reviews as (
-    select * from {{ ref('stg_olist__order_reviews') }}
-),
-
--- aggregate payments to order grain
-payments as (
-    select
-        order_id,
-        sum(payment_amount_brl)     as revenue_brl,
-        max(installments)           as max_installments
-    from payments_raw
-    group by order_id
+    select * from {{ ref('int_order_reviews_deduped_to_orders') }}
 ),
 
 final as (
@@ -37,17 +27,17 @@ final as (
         case
             when o.delivered_to_customer_at > o.estimated_delivery_at then true
             else false
-        end                             as is_late_delivery,
+        end                                 as is_late_delivery,
 
         -- measures
         o.delivery_days,
         datediff('day',
             o.delivered_to_customer_at,
-            o.estimated_delivery_at)    as delivery_vs_estimate_days,
+            o.estimated_delivery_at)        as delivery_vs_estimate_days,
 
         -- payment measures
-        coalesce(p.revenue_brl, 0)      as revenue_brl,
-        coalesce(p.max_installments, 0) as max_installments,
+        coalesce(p.total_payment_brl, 0)    as revenue_brl,
+        coalesce(p.max_installments, 0)     as max_installments,
 
         -- review measures
         r.review_score,
