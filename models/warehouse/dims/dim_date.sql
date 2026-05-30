@@ -11,26 +11,44 @@ with calendar_dates as (
 final as (
 
     select
-        -- surrogate key
-        {{ dbt_utils.generate_surrogate_key(['date(date_day)']) }} as date_sk,
-
         -- primary key
         date_day::date                                          as date_day,
 
         -- day level
         extract(day from date_day)                             as day_of_month_number,
-        extract(doy from date_day)                             as day_of_year_number,
-        extract(isodow from date_day)                          as day_of_week_number,
-        to_char(date_day, 'Dy')                                as short_weekday_name,
-        to_char(date_day, 'Day')                               as full_weekday_name,
+        extract(dayofyear from date_day)                       as day_of_year_number,
+        extract(dayofweek from date_day)                       as day_of_week_number,
+        dayname(date_day)                                      as short_weekday_name,
+        case extract(dayofweek from date_day)
+            when 0 then 'Sunday'
+            when 1 then 'Monday'
+            when 2 then 'Tuesday'
+            when 3 then 'Wednesday'
+            when 4 then 'Thursday'
+            when 5 then 'Friday'
+            when 6 then 'Saturday'
+        end                                                    as full_weekday_name,
 
         -- week level
         extract(week from date_day)                            as week_of_year_number,
 
         -- month level
         extract(month from date_day)                           as month_of_year_number,
-        to_char(date_day, 'Mon')                               as short_month_name,
-        to_char(date_day, 'Month')                             as full_month_name,
+        monthname(date_day)                                    as short_month_name,
+        case extract(month from date_day)
+            when 1  then 'January'
+            when 2  then 'February'
+            when 3  then 'March'
+            when 4  then 'April'
+            when 5  then 'May'
+            when 6  then 'June'
+            when 7  then 'July'
+            when 8  then 'August'
+            when 9  then 'September'
+            when 10 then 'October'
+            when 11 then 'November'
+            when 12 then 'December'
+        end                                                    as full_month_name,
 
         -- quarter level
         extract(quarter from date_day)                         as quarter_of_year_number,
@@ -39,24 +57,37 @@ final as (
         -- year level
         extract(year from date_day)                            as year_number,
 
-        -- combined labels (useful for BI tool axis labels)
+        -- combined labels
         to_char(date_day, 'YYYY-MM-DD')                        as full_date_string,
-        to_char(date_day, 'Mon') || ' '
+        monthname(date_day) || ' '
             || extract(year from date_day)                     as short_month_year,
-        to_char(date_day, 'Month') || ' '
-            || extract(year from date_day)                     as full_month_year,
+        case extract(month from date_day)
+            when 1  then 'January'
+            when 2  then 'February'
+            when 3  then 'March'
+            when 4  then 'April'
+            when 5  then 'May'
+            when 6  then 'June'
+            when 7  then 'July'
+            when 8  then 'August'
+            when 9  then 'September'
+            when 10 then 'October'
+            when 11 then 'November'
+            when 12 then 'December'
+        end || ' ' || extract(year from date_day)              as full_month_year,
         to_char(date_day, 'YYYY-MM')                           as year_month,
         'Q' || extract(quarter from date_day) || ' '
             || extract(year from date_day)                     as year_quarter,
 
         -- booleans
+        -- in Snowflake: dayofweek 0=Sunday, 6=Saturday
         case
-            when extract(isodow from date_day) in (6, 7) then true
+            when extract(dayofweek from date_day) in (0, 6) then true
             else false
         end                                                    as is_weekend,
 
         case
-            when extract(isodow from date_day) in (1, 2, 3, 4, 5) then true
+            when extract(dayofweek from date_day) in (1, 2, 3, 4, 5) then true
             else false
         end                                                    as is_weekday
 

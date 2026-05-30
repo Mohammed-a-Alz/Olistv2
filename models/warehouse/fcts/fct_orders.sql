@@ -15,7 +15,6 @@ payments as (
     select
         order_id,
         sum(payment_amount_brl)     as revenue_brl,
-        count(*)                    as payment_count,
         max(installments)           as max_installments
     from payments_raw
     group by order_id
@@ -33,7 +32,12 @@ final as (
         o.order_status,
         o.is_delivered,
         o.is_canceled,
-        o.is_late_delivery,
+
+        -- computed flag
+        case
+            when o.delivered_to_customer_at > o.estimated_delivery_at then true
+            else false
+        end                             as is_late_delivery,
 
         -- measures
         o.delivery_days,
@@ -43,7 +47,6 @@ final as (
 
         -- payment measures
         coalesce(p.revenue_brl, 0)      as revenue_brl,
-        coalesce(p.payment_count, 0)    as payment_count,
         coalesce(p.max_installments, 0) as max_installments,
 
         -- review measures
