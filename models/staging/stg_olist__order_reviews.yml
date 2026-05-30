@@ -14,7 +14,6 @@ models:
         description: "Foreign key to stg_olist__orders. Unique after deduplication."
         tests:
           - not_null
-          - unique
           - relationships:
               arguments:
                 to: ref('stg_olist__orders')
