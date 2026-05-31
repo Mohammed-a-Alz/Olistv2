@@ -1,0 +1,47 @@
+models:
+  - name: dim_products
+    description: "Product dimension. One row per product. Contains category and physical attributes."
+
+    semantic_model:
+      enabled: true
+      name: products
+
+    columns:
+
+      # Entity
+      - name: product_id
+        description: "Primary key. Must match product_id in fct_order_items."
+        entity:
+          name: product
+          type: primary
+
+      # Categorical Dimensions
+      - name: category_portuguese
+        description: "Product category name in Portuguese as provided by Olist."
+        dimension:
+          type: categorical
+
+      - name: category_english
+        description: "Product category name translated to English."
+        dimension:
+          type: categorical
+
+      - name: product_weight_g
+        description: "Product weight in grams."
+        dimension:
+          type: categorical
+
+      - name: product_length_cm
+        description: "Product length in centimeters."
+        dimension:
+          type: categorical
+
+      - name: product_height_cm
+        description: "Product height in centimeters."
+        dimension:
+          type: categorical
+
+      - name: product_width_cm
+        description: "Product width in centimeters."
+        dimension:
+          type: categorical

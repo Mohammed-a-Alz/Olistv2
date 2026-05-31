@@ -27,17 +27,24 @@ final as (
         case
             when o.delivered_to_customer_at > o.estimated_delivery_at then true
             else false
-        end                                 as is_late_delivery,
+        end as is_late_delivery,
 
         -- measures
         o.delivery_days,
-        datediff('day',
+
+        datediff(
+            'day',
             o.delivered_to_customer_at,
-            o.estimated_delivery_at)        as delivery_vs_estimate_days,
+            o.estimated_delivery_at
+        ) as delivery_vs_estimate_days,
 
         -- payment measures
-        coalesce(p.total_payment_brl, 0)    as revenue_brl,
-        coalesce(p.max_installments, 0)     as max_installments,
+        case
+            when o.is_canceled then 0
+            else coalesce(p.total_payment_brl, 0)
+        end as revenue_brl,
+
+        coalesce(p.max_installments, 0) as max_installments,
 
         -- review measures
         r.review_score,
@@ -50,8 +57,12 @@ final as (
         o.estimated_delivery_at
 
     from orders o
-    left join payments p    on o.order_id = p.order_id
-    left join reviews r     on o.order_id = r.order_id
+
+    left join payments p
+        on o.order_id = p.order_id
+
+    left join reviews r
+        on o.order_id = r.order_id
 )
 
 select * from final

@@ -1,0 +1,90 @@
+models:
+  - name: fct_order_items
+    description: "Order items fact table. One row per order item. Use for product and seller level analysis."
+
+    semantic_model:
+      enabled: true
+      name: order_items
+
+    agg_time_dimension: purchased_at
+
+    columns:
+
+      # Entities
+      - name: order_item_sk
+        description: "Surrogate primary key generated from order_id + item_id."
+        entity:
+          name: order_item
+          type: primary
+
+      - name: order_id
+        description: "Foreign key to orders."
+        entity:
+          name: order
+          type: foreign
+
+      - name: product_id
+        description: "Foreign key to products."
+        entity:
+          name: product
+          type: foreign
+
+      - name: seller_id
+        description: "Foreign key to sellers."
+        entity:
+          name: seller
+          type: foreign
+
+      # Time Dimensions
+      - name: purchased_at
+        description: "Order purchase timestamp inherited from parent order."
+        granularity: day
+        dimension:
+          type: time
+
+      # Categorical Dimensions
+      - name: item_id
+        description: "Sequential item position within an order."
+        dimension:
+          type: categorical
+
+      - name: is_delivered
+        description: "True if the parent order was delivered."
+        dimension:
+          type: categorical
+
+      - name: is_canceled
+        description: "True if the parent order was canceled."
+        dimension:
+          type: categorical
+
+    metrics:
+
+      # Revenue Metrics
+      - name: total_item_revenue_brl
+        description: "Total revenue from order items including freight."
+        type: simple
+        label: Total Item Revenue BRL
+        agg: sum
+        expr: total_amount_brl
+
+      - name: total_items_sold
+        description: "Total number of order items sold."
+        type: simple
+        label: Total Items Sold
+        agg: count_distinct
+        expr: order_item_sk
+
+      - name: avg_item_price_brl
+        description: "Average item price excluding freight."
+        type: simple
+        label: Average Item Price BRL
+        agg: average
+        expr: price_brl
+
+      - name: avg_freight_brl
+        description: "Average freight charged per item."
+        type: simple
+        label: Average Freight BRL
+        agg: average
+        expr: freight_brl

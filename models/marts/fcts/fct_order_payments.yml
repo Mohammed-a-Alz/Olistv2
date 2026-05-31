@@ -1,0 +1,87 @@
+models:
+  - name: fct_order_payments
+    description: "Payment fact table. One row per payment sequence per order. Use for payment method and installment analysis."
+
+    semantic_model:
+      enabled: true
+      name: order_payments
+
+    agg_time_dimension: purchased_at
+
+    columns:
+
+      # Entities
+      - name: payment_sk
+        description: "Surrogate primary key. Generated from order_id + payment_sequence."
+        entity:
+          name: payment
+          type: primary
+
+      - name: order_id
+        description: "Foreign key to orders."
+        entity:
+          name: order
+          type: foreign
+
+      - name: customer_id
+        description: "Foreign key to customers. Inherited from parent order."
+        entity:
+          name: customer
+          type: foreign
+
+      # Time Dimension
+      - name: purchased_at
+        description: "Order purchase timestamp inherited from order."
+        granularity: day
+        dimension:
+          type: time
+
+      # Categorical Dimensions
+      - name: payment_type
+        description: "Payment method used (credit_card, boleto, voucher, debit_card)."
+        dimension:
+          type: categorical
+
+      - name: is_credit_card
+        description: "True if payment was made by credit card."
+        dimension:
+          type: categorical
+
+      - name: is_installment
+        description: "True if payment was split into installments."
+        dimension:
+          type: categorical
+
+      - name: is_delivered
+        description: "True if parent order was delivered."
+        dimension:
+          type: categorical
+
+      - name: is_canceled
+        description: "True if parent order was canceled."
+        dimension:
+          type: categorical
+
+    metrics:
+
+      - name: total_payment_revenue_brl
+        description: "Sum of all payment amounts in BRL."
+        type: simple
+        label: Total Payment Revenue BRL
+        agg: sum
+        expr: payment_amount_brl
+
+      - name: total_payments
+        description: "Count of distinct payment records."
+        type: simple
+        label: Total Payments
+        agg: count_distinct
+        expr: payment_sk
+
+      - name: avg_payment_amount_brl
+        description: "Average payment amount per payment record."
+        type: simple
+        label: Average Payment Amount BRL
+        agg: average
+        expr: payment_amount_brl
+

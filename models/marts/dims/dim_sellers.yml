@@ -1,0 +1,27 @@
+models:
+  - name: dim_sellers
+    description: "Seller dimension. One row per seller. Contains location attributes."
+
+    semantic_model:
+      enabled: true
+      name: sellers
+
+    columns:
+
+      # Entity
+      - name: seller_id
+        description: "Primary key. Must match seller_id in fct_order_items."
+        entity:
+          name: seller
+          type: primary
+
+      # Categorical Dimensions
+      - name: city
+        description: "City where the seller is located."
+        dimension:
+          type: categorical
+
+      - name: state
+        description: "State where the seller is located. Brazilian UF code."
+        dimension:
+          type: categorical
