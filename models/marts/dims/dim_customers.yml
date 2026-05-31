@@ -1,0 +1,37 @@
+models:
+  - name: dim_customers
+    description: "Customer dimension. One row per customer_id. Contains location and lifecycle attributes."
+
+    semantic_model:
+      enabled: true
+      name: customers
+
+    columns:
+
+      # Entity
+      - name: customer_id
+        description: "Primary key. Unique per order in Olist. customer_unique_id tracks the same person across orders."
+        entity:
+          name: customer
+          type: primary
+
+      # Categorical Dimensions
+      - name: city
+        description: "Customer city."
+        dimension:
+          type: categorical
+
+      - name: state
+        description: "Customer state. Brazilian UF code."
+        dimension:
+          type: categorical
+
+      - name: is_repeat_customer
+        description: "True if the customer has placed more than one order."
+        dimension:
+          type: categorical
+
+      - name: has_delivered_order
+        description: "True if at least one of the customer's orders was successfully delivered."
+        dimension:
+          type: categorical

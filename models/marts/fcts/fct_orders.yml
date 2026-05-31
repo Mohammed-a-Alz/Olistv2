@@ -1,0 +1,117 @@
+models:
+  - name: fct_orders
+    description: "Order fact table. One row per order."
+
+    semantic_model:
+      enabled: true
+      name: orders
+
+    agg_time_dimension: purchased_at
+
+    columns:
+
+      # Entities
+      - name: order_id
+        entity:
+          name: order
+          type: primary
+
+      - name: customer_id
+        entity:
+          name: customer
+          type: foreign
+
+      # Time Dimensions
+      - name: purchased_at
+        granularity: day
+        dimension:
+          type: time
+
+      # Categorical Dimensions
+      - name: order_status
+        dimension:
+          type: categorical
+
+      - name: is_delivered
+        dimension:
+          type: categorical
+
+      - name: is_canceled
+        dimension:
+          type: categorical
+
+      - name: is_late_delivery
+        dimension:
+          type: categorical
+
+    metrics:
+
+      # Revenue
+      - name: total_revenue_brl
+        description: "Total revenue from non-canceled orders, including freight charges, measured in BRL"
+        type: simple
+        label: Total Revenue BRL
+        agg: sum
+        expr: revenue_brl
+
+      # Orders
+      - name: total_orders
+        description: "Total number of orders"
+        type: simple
+        label: Total Orders
+        agg: count_distinct
+        expr: order_id
+
+      # Average Order Value
+      - name: avg_order_value
+        description: "Average revenue generated per non-canceled order, measured in BRL"
+        type: simple
+        label: Average Order Value
+        agg: average
+        expr: revenue_brl
+
+      # Delivery Metrics
+      - name: avg_delivery_days
+        description: "Average number of days between purchase and customer delivery"
+        type: simple
+        label: Average Delivery Days
+        agg: average
+        expr: delivery_days
+
+      # Review Metrics
+      - name: avg_review_score
+        description: "Average customer review score (1-5). Null if no review submitted"
+        type: simple
+        label: Average Review Score
+        agg: average
+        expr: review_score
+
+      # Installment
+      - name: avg_installments
+        description: "Average number of payment installments per order."
+        type: simple
+        label: Average Installments
+        agg: average
+        expr: max_installments
+
+      # Operational Metrics
+      - name: canceled_orders
+        description: "Total number of orders marked as canceled"
+        type: simple
+        label: Canceled Orders
+        agg: sum
+        expr: case when is_canceled then 1 else 0 end
+
+      - name: late_deliveries
+        description: "Total number of delivered orders where the actual delivery date exceeded the estimated delivery date"
+        type: simple
+        label: Late Deliveries
+        agg: sum
+        expr: case when is_late_delivery then 1 else 0 end
+
+      - name: delivered_orders
+        description: "Total number of successfully delivered orders"
+        type: simple
+        label: Delivered Orders
+        agg: sum
+        expr: case when is_delivered then 1 else 0 end
