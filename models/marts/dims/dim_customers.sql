@@ -38,7 +38,14 @@ final as (
         case
             when co.has_delivered_order = 1 then true
             else false
-        end                             as has_delivered_order
+        end                             as has_delivered_order,
+
+        -- snapshot metadata
+        dbt_scd_id,
+        dbt_updated_at,
+        dbt_valid_from,
+        dbt_valid_to
+
 
     from customers c
     left join geolocation g         on c.zip_code = g.zip_code
